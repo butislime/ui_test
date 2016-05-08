@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 using System.Collections;
 
 public class ScrollView : MonoBehaviour
@@ -8,7 +10,15 @@ public class ScrollView : MonoBehaviour
 
 	[SerializeField] int contentsNum;
 
+	int currentIndex = 0;
+	ScrollRect scrollRect;
 	Content[] contents;
+
+	void Awake()
+	{
+		scrollRect = GetComponent<ScrollRect>();
+		scrollRect.onValueChanged.AddListener(OnScroll);
+	}
 
 	void Start()
 	{
@@ -19,9 +29,9 @@ public class ScrollView : MonoBehaviour
 			var rect_trans = content.transform as RectTransform;
 			rect_trans.SetParent(view, false);
 			contents[i] = content.GetComponent<Content>();
-			var pos = rect_trans.localPosition;
+			var pos = rect_trans.anchoredPosition;
 			pos.y = -rect_trans.sizeDelta.y * i;
-			content.transform.localPosition = pos;
+			rect_trans.anchoredPosition = pos;
 		}
 		originContent.gameObject.SetActive(false);
 
@@ -35,6 +45,20 @@ public class ScrollView : MonoBehaviour
 		for(int i = 0; i < contents.Length; ++i)
 		{
 			contents[i].UpdateContent(i);
+		}
+	}
+
+	void OnScroll(Vector2 pos)
+	{
+		var content = Array.Find(contents, item => item.index == currentIndex);
+		if(view.anchoredPosition.y > (content.size.y * (content.index+1)))
+		{
+			var index = content.index + contentsNum;
+			// var rect_trans = content.transform as RectTransform;
+			// var pos = rect_trans.anchoredPosition;
+			content.UpdateContent(index);
+			currentIndex++;
+			return;
 		}
 	}
 }
