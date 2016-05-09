@@ -5,6 +5,7 @@ public class Content : MonoBehaviour
 {
 	[SerializeField] UnityEngine.UI.Text text;
 	public int index;
+	public bool calculated = false;
 
 	public Vector2 size
 	{

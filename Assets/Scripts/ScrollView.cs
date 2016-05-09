@@ -22,8 +22,8 @@ public class ScrollView : MonoBehaviour
 
 	void Start()
 	{
-		contents = new Content[4];
-		for(int i = 0; i < 4; ++i)
+		contents = new Content[6];
+		for(int i = 0; i < 6; ++i)
 		{
 			var content = Instantiate(originContent);
 			var rect_trans = content.transform as RectTransform;
@@ -38,7 +38,7 @@ public class ScrollView : MonoBehaviour
 		{
 			var rect_trans = view.transform as RectTransform;
 			var size_delta = rect_trans.sizeDelta;
-			size_delta.y = 100*contentsNum;
+			size_delta.y = originContent.sizeDelta.y*contentsNum;
 			rect_trans.sizeDelta = size_delta;
 		}
 
@@ -48,17 +48,30 @@ public class ScrollView : MonoBehaviour
 		}
 	}
 
-	void OnScroll(Vector2 pos)
+	void OnScroll(Vector2 scroll_ratio)
 	{
-		var content = Array.Find(contents, item => item.index == currentIndex);
-		if(view.anchoredPosition.y > (content.size.y * (content.index+1)))
+		currentIndex = (int)(view.anchoredPosition.y / originContent.sizeDelta.y);
+		for(int i = 0; i < contents.Length; ++i)
 		{
-			var index = content.index + contentsNum;
-			// var rect_trans = content.transform as RectTransform;
-			// var pos = rect_trans.anchoredPosition;
-			content.UpdateContent(index);
-			currentIndex++;
-			return;
+			contents[i].calculated = false;
+		}
+		for(int i = currentIndex; i < currentIndex + contents.Length; ++i)
+		{
+			if(i >= contentsNum) continue;
+			var content = Array.Find(contents, item => item.index == i);
+			if(content != null)
+			{
+				content.calculated = true;
+				continue;
+			}
+			content = Array.Find(contents, item => item.index < currentIndex || item.index > currentIndex + contents.Length-1);
+			if(content == null) continue;
+			var rect_trans = content.transform as RectTransform;
+			var pos = rect_trans.anchoredPosition;
+			pos.y = -content.size.y * i;
+			rect_trans.anchoredPosition = pos;
+			content.UpdateContent(i);
+			content.calculated = true;
 		}
 	}
 }
