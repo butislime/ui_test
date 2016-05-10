@@ -124,7 +124,19 @@ public class ScrollList : MonoBehaviour
 	}
 	void UpdateElements()
 	{
-		currentIndex = (int)((scrollType == ScrollType.Horizontal ? -contentsXform.anchoredPosition.x : contentsXform.anchoredPosition.y) / elementSize);
+		var scroll_pos = 0.0f;
+		if(scrollType == ScrollType.Horizontal)
+		{
+			scroll_pos = -contentsXform.anchoredPosition.x;
+			if(contentsXform.pivot.x >= 1.0f) scroll_pos = Mathf.Abs(contentsXform.sizeDelta.x) - Mathf.Abs(scroll_pos);
+        }
+		else
+		{
+			scroll_pos = contentsXform.anchoredPosition.y;
+			if(contentsXform.pivot.y <= 0.0f) scroll_pos = Mathf.Abs(contentsXform.sizeDelta.y) - Mathf.Abs(scroll_pos);
+		}
+
+		currentIndex = (int)(scroll_pos / elementSize);
 		if(currentIndex < 0) currentIndex = 0;
 		for(int i = 0; i < elements.Length; ++i)
 		{
