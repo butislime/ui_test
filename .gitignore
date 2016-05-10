@@ -46,7 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-*.meta
+*.swp
 *.csproj
 Temp/
 Library/
