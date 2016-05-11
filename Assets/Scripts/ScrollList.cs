@@ -64,6 +64,7 @@ public class ScrollList : MonoBehaviour
 	[SerializeField] RectTransform originElement;
 
 	[SerializeField] int elementNum;
+	[SerializeField] int columnNum = 1;
 
 	class ManagedElement
 	{
@@ -86,7 +87,8 @@ public class ScrollList : MonoBehaviour
 		scrollRect.vertical = scrollType == ScrollType.Vertical;
 		scrollTransform = scrollRect.transform as RectTransform;
 
-		var element_num = (int)(scrollViewSize / elementSize)+2;
+		var element_num = (int)(scrollViewSize / elementSize) * (columnNum+1);
+		// var element_num = (int)(scrollViewSize / elementSize)+2;
 		elements = new ManagedElement[element_num];
 		for(int i = 0; i < elements.Length; ++i)
 		{
@@ -111,8 +113,9 @@ public class ScrollList : MonoBehaviour
 	void UpdateViewSize()
 	{
 		var size_delta = contentsXform.sizeDelta;
-		if(scrollType == ScrollType.Horizontal) size_delta.x = elementSize * elementNum;
-		else                                    size_delta.y = elementSize * elementNum;
+		var row_num = Mathf.CeilToInt((float)elementNum / columnNum);
+		if(scrollType == ScrollType.Horizontal) size_delta.x = elementSize * row_num;
+		else                                    size_delta.y = elementSize * row_num;
 		contentsXform.sizeDelta = size_delta;
 
 		UpdateElements();
@@ -177,12 +180,17 @@ public class ScrollList : MonoBehaviour
 	{
 		var rect_trans = element.element.xform;
 		var pos = rect_trans.anchoredPosition;
+		var column_num = new_index % columnNum;
+		var row_num = new_index / columnNum;
 		if(scrollType == ScrollType.Horizontal) pos.x = elementSize * new_index;
-		else                                    pos.y = -elementSize * new_index;
+		else
+		{
+			pos.x = originElement.sizeDelta.x * column_num;
+			pos.y = -elementSize * row_num;
+		}
 		rect_trans.anchoredPosition = pos;
 		element.element.UpdateIndex(new_index);
 		onUpdateElement.Invoke(element.element);
-		// element.element.UpdateElement();
 		element.calculated = true;
 		element.element.gameObject.SetActive(true);
 	}
